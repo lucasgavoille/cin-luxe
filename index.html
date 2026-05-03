@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CinéLux — Gestion</title>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,700;0,900;1,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════
+   ROOT & RESET
+══════════════════════════════════════ */
+:root {
+  --bg:#06060e; --bg2:#0e0e1c; --bg3:#161628; --bg4:#1e1e32;
+  --border:rgba(255,255,255,.07); --border2:rgba(255,255,255,.12);
+  --red:#e8192c; --red2:#ff4d5e; --red-dim:rgba(232,25,44,.15);
+  --gold:#f0c040; --gold-dim:rgba(240,192,64,.12);
+  --green:#22c55e; --green-dim:rgba(34,197,94,.12);
+  --blue:#6366f1; --blue-dim:rgba(99,102,241,.12);
+  --white:#f5f2ec; --gray:#8a8899; --gray2:#555468;
+  --r:10px; --r2:16px; --r3:22px;
+  --shadow:0 16px 48px rgba(0,0,0,.6);
+  --font-display:'Bodoni Moda',serif; --font:'Syne',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--white);font-family:var(--font);min-height:100vh;overflow-x:hidden;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px;}
+input,select,textarea,button{font-family:var(--font);}
+
+/* ══════════════════════════════════════
+   LOGIN
+══════════════════════════════════════ */
+#login-screen {
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  padding:20px;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(232,25,44,.14) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 85% 90%, rgba(99,102,241,.1) 0%, transparent 70%),
+    var(--bg);
+}
+.login-box {
+  width:100%; max-width:440px;
+  background:var(--bg2); border:1px solid var(--border2);
+  border-radius:var(--r3); overflow:hidden;
+  box-shadow:var(--shadow);
+  animation:fadeUp .4s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+.login-header {
+  background:linear-gradient(135deg, rgba(232,25,44,.2) 0%, rgba(99,102,241,.08) 100%);
+  border-bottom:1px solid var(--border); padding:36px 32px 28px;
+  text-align:center;
+}
+.login-logo {
+  font-family:var(--font-display); font-size:2.6rem; font-weight:900;
+  letter-spacing:.06em; line-height:1;
+}
+.login-logo em{color:var(--red);font-style:normal;}
+.login-tagline{font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gray);margin-top:8px;}
+.login-tabs {
+  display:flex; background:var(--bg3); border-bottom:1px solid var(--border);
+}
+.ltab {
+  flex:1; padding:14px; border:none; background:none; color:var(--gray);
+  font-family:var(--font); font-size:.8rem; font-weight:700;
+  letter-spacing:.08em; text-transform:uppercase; cursor:pointer;
+  transition:all .2s; border-bottom:2px solid transparent;
+}
+.ltab.on{color:var(--white);border-bottom-color:var(--red);background:rgba(232,25,44,.06);}
+.login-body{padding:28px 32px 32px;}
+.fg{margin-bottom:18px;}
+.fg label{display:block;font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);margin-bottom:7px;}
+.fg input,.fg select{
+  width:100%;background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--r);padding:12px 14px;color:var(--white);
+  font-size:.88rem;outline:none;transition:border-color .2s;
+}
+.fg input:focus,.fg select:focus{border-color:var(--red);}
+.fg select option{background:var(--bg3);}
+.login-hint{
+  margin-top:16px;padding:12px;background:var(--bg3);border-radius:var(--r);
+  font-size:.75rem;color:var(--gray);line-height:1.7;
+}
+.login-hint code{color:var(--gold);background:rgba(240,192,64,.1);padding:1px 5px;border-radius:4px;}
+
+/* ══════════════════════════════════════
+   APP SHELL
+══════════════════════════════════════ */
+#app{display:none;min-height:100vh;}
+
+/* SIDEBAR */
+#sidebar {
+  position:fixed; top:0; left:0; bottom:0; width:220px;
+  background:var(--bg2); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; z-index:800;
+  transition:transform .3s;
+}
+.sidebar-logo {
+  padding:24px 20px 20px;
+  font-family:var(--font-display); font-size:1.5rem; font-weight:900;
+  border-bottom:1px solid var(--border); letter-spacing:.05em;
+}
+.sidebar-logo em{color:var(--red);font-style:normal;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px 10px;}
+.snav-section{
+  font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--gray2);padding:14px 10px 6px;
+}
+.snav-btn {
+  display:flex;align-items:center;gap:10px;width:100%;
+  background:none;border:none;color:var(--gray);
+  font-family:var(--font);font-size:.82rem;font-weight:600;
+  padding:10px 12px;border-radius:var(--r);cursor:pointer;
+  transition:all .18s;text-align:left;letter-spacing:.02em;
+}
+.snav-btn .ico{font-size:1rem;width:20px;text-align:center;flex-shrink:0;}
+.snav-btn:hover{background:var(--bg3);color:var(--white);}
+.snav-btn.on{background:var(--red-dim);color:var(--red);}
+.sidebar-footer{padding:16px;}
+.user-chip {
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg3);border-radius:var(--r);padding:10px 12px;
+  margin-bottom:10px;
+}
+.user-ava{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:.9rem;
+  background:var(--red-dim);flex-shrink:0;
+}
+.user-info .uname{font-size:.82rem;font-weight:700;}
+.user-info .urole{font-size:.68rem;color:var(--gray);text-transform:uppercase;letter-spacing:.08em;}
+
+/* MOBILE TOPBAR */
+#mobile-bar{
+  display:none;position:fixed;top:0;left:0;right:0;height:56px;
+  background:rgba(6,6,14,.95);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);z-index:900;
+  align-items:center;padding:0 16px;gap:12px;
+}
+#mobile-bar .mb-logo{font-family:var(--font-display);font-size:1.3rem;font-weight:900;flex:1;}
+#mobile-bar .mb-logo em{color:var(--red);font-style:normal;}
+#menu-toggle{
+  background:none;border:none;color:var(--white);font-size:1.4rem;cursor:pointer;padding:6px;
+}
+#sidebar-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:799;
+}
+
+/* MAIN CONTENT */
+#main{margin-left:220px;min-height:100vh;padding:28px 28px 40px;}
+
+/* ══════════════════════════════════════
+   PAGES
+══════════════════════════════════════ */
+.page{display:none;animation:fadeIn .22s ease;}
+.page.on{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:28px;}
+.ph-title{font-family:var(--font-display);font-size:2rem;font-weight:700;line-height:1.1;}
+.ph-sub{font-size:.78rem;color:var(--gray);margin-top:5px;letter-spacing:.04em;}
+
+/* ══════════════════════════════════════
+   COMPONENTS
+══════════════════════════════════════ */
+
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:10px 20px;border-radius:var(--r);border:none;
+  font-family:var(--font);font-weight:700;font-size:.78rem;
+  cursor:pointer;transition:all .18s;letter-spacing:.05em;text-transform:uppercase;
+}
+.btn-red{background:var(--red);color:#fff;}
+.btn-red:hover{filter:brightness(1.15);transform:translateY(-1px);}
+.btn-ghost{background:var(--bg3);color:var(--white);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--bg4);border-color:var(--border2);}
+.btn-gold{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(240,192,64,.2);}
+.btn-gold:hover{background:rgba(240,192,64,.22);}
+.btn-danger{background:var(--red-dim);color:var(--red2);border:1px solid rgba(232,25,44,.2);}
+.btn-danger:hover{background:rgba(232,25,44,.25);}
+.btn-green{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,.2);}
+.btn-green:hover{background:rgba(34,197,94,.22);}
+.btn-sm{padding:7px 13px;font-size:.71rem;}
+.btn-xs{padding:5px 9px;font-size:.68rem;}
+.btn:disabled{opacity:.35;cursor:default;transform:none!important;filter:none!important;}
+
+/* Cards */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:22px;}
+.card:hover{border-color:var(--border2);}
+.card-red{border-color:rgba(232,25,44,.25);}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:28px;}
+.stat{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);
+  padding:18px 20px;display:flex;align-items:center;gap:14px;
+}
+.stat-ico{
+  width:42px;height:42px;border-radius:var(--r);
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
+}
+.s-r{background:var(--red-dim);}.s-g{background:var(--green-dim);}
+.s-o{background:var(--gold-dim);}.s-b{background:var(--blue-dim);}
+.stat-val{font-size:1.8rem;font-weight:700;line-height:1;font-family:var(--font-display);}
+.stat-lbl{font-size:.7rem;color:var(--gray);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;}
+
+/* Tags */
+.tag{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;}
+.tg{background:var(--green-dim);color:var(--green);}
+.tr{background:var(--red-dim);color:var(--red2);}
+.to{background:rgba(251,146,60,.12);color:#fb923c;}
+.tb{background:var(--blue-dim);color:#818cf8;}
+.ty{background:var(--gold-dim);color:var(--gold);}
+
+/* Table */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r2);border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;}
+th{
+  background:var(--bg3);padding:11px 16px;
+  font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--gray);text-align:left;border-bottom:1px solid var(--border);
+}
+td{padding:12px 16px;font-size:.83rem;border-bottom:1px solid var(--border);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+
+/* Forms */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:480px){.form-row{grid-template-columns:1fr;}}
+
+/* Divider */
+hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
+
+/* ══════════════════════════════════════
+   MODAL
+══════════════════════════════════════ */
+.overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.8);backdrop-filter:blur(8px);
+  z-index:2000;align-items:center;justify-content:center;padding:16px;
+}
+.overlay.on{display:flex;}
+.modal{
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:var(--r3);padding:28px;width:100%;
+  max-height:92vh;overflow-y:auto;
+  animation:fadeUp .22s ease;
+}
+.modal-sm{max-width:460px;}
+.modal-md{max-width:560px;}
+.modal-lg{max-width:720px;}
+.mhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.mtitle{font-family:var(--font-display);font-size:1.4rem;font-weight:700;}
+.mclose{background:none;border:none;color:var(--gray);font-size:1.3rem;cursor:pointer;padding:4px;line-height:1;transition:color .2s;}
+.mclose:hover{color:var(--red);}
+
+/* ══════════════════════════════════════
+   SEAT MAP
+══════════════════════════════════════ */
+.screen{
+  background:linear-gradient(90deg,transparent,rgba(240,192,64,.08),transparent);
+  border-top:2px solid rgba(240,192,64,.3);
+  text-align:center;padding:7px 0;
+  font-size:.64rem;letter-spacing:.2em;color:var(--gold);
+  text-transform:uppercase;margin-bottom:20px;border-radius:3px;
+}
+.seat-wrap{display:flex;flex-direction:column;gap:6px;align-items:center;}
+.srow{display:flex;align-items:center;gap:5px;}
+.rlbl{width:18px;text-align:center;font-size:.68rem;color:var(--gray2);font-weight:700;flex-shrink:0;}
+.s{
+  width:26px;height:24px;border-radius:4px 4px 3px 3px;
+  cursor:pointer;border:none;flex-shrink:0;transition:all .12s;
+}
+.s.libre{background:var(--bg4);border:1px solid var(--border2);}
+.s.libre:hover{background:rgba(34,197,94,.3);border-color:var(--green);transform:scale(1.15);}
+.s.vip.libre{background:rgba(240,192,64,.14);border:1px solid rgba(240,192,64,.3);}
+.s.vip.libre:hover{background:rgba(240,192,64,.3);}
+.s.pris{background:rgba(232,25,44,.25);border:1px solid rgba(232,25,44,.4);cursor:default;}
+.s.sel{background:var(--green);border:1px solid var(--green);}
+.s.vip.sel{background:var(--gold);border:1px solid var(--gold);}
+.s.off{background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.06);cursor:default;}
+.leg{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:14px;}
+.leg-i{display:flex;align-items:center;gap:5px;font-size:.7rem;color:var(--gray);}
+.leg-d{width:13px;height:13px;border-radius:3px;}
+
+/* ══════════════════════════════════════
+   EDIT SALLE
+══════════════════════════════════════ */
+.edit-s{
+  width:24px;height:22px;border-radius:4px;
+  cursor:pointer;border:none;flex-shrink:0;transition:all .12s;
+}
+.en{background:var(--bg4);border:1px solid var(--border2);}
+.en:hover{border-color:var(--blue);transform:scale(1.15);}
+.ev{background:rgba(240,192,64,.14);border:1px solid rgba(240,192,64,.3);}
+.ev:hover{border-color:var(--gold);}
+.ed{background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.06);opacity:.5;}
+.emode-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.emode-btn{
+  padding:6px 14px;border-radius:8px;border:2px solid transparent;
+  font-family:var(--font);font-size:.72rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;cursor:pointer;transition:all .15s;
+}
+.em-n{background:var(--bg3);color:var(--white);}
+.em-v{background:var(--gold-dim);color:var(--gold);}
+.em-d{background:var(--bg3);color:var(--gray);}
+.emode-btn.active{border-color:var(--red);}
+
+/* ══════════════════════════════════════
+   CLIENT PORTAL
+══════════════════════════════════════ */
+.c-hero{
+  border-radius:var(--r3);overflow:hidden;margin-bottom:30px;
+  background:linear-gradient(135deg,rgba(232,25,44,.12) 0%,rgba(99,102,241,.07) 100%);
+  border:1px solid rgba(232,25,44,.14);
+  padding:36px 32px;
+}
+.c-hero-title{font-family:var(--font-display);font-size:2.4rem;font-weight:900;line-height:1.1;}
+.c-hero-title em{color:var(--red);font-style:normal;}
+.c-hero-sub{color:var(--gray);font-size:.85rem;margin-top:8px;}
+
+.film-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;}
+.film-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r2);overflow:hidden;cursor:pointer;transition:all .22s;
+}
+.film-card:hover{border-color:var(--red);transform:translateY(-3px);box-shadow:0 12px 32px rgba(232,25,44,.14);}
+.film-poster{
+  height:140px;display:flex;align-items:center;justify-content:center;
+  font-size:3.2rem;position:relative;
+}
+.film-badge{
+  position:absolute;top:10px;right:10px;
+  font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  background:rgba(0,0,0,.65);backdrop-filter:blur(4px);
+  padding:3px 8px;border-radius:20px;color:var(--gold);
+}
+.film-body{padding:14px;}
+.film-name{font-family:var(--font-display);font-size:1.05rem;font-weight:700;margin-bottom:4px;}
+.film-meta{font-size:.72rem;color:var(--gray);}
+.film-seances{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.stime-btn{
+  background:var(--red-dim);border:1px solid rgba(232,25,44,.2);
+  color:var(--red2);padding:5px 10px;border-radius:7px;
+  font-size:.72rem;font-weight:700;cursor:pointer;transition:all .18s;
+  font-family:var(--font);letter-spacing:.03em;
+}
+.stime-btn:hover{background:var(--red);color:#fff;}
+
+/* Progress */
+.pbar{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;}
+.pfill{height:100%;border-radius:2px;transition:width .4s;}
+.p-g{background:var(--green);}.p-o{background:#fb923c;}.p-r{background:var(--red);}
+
+/* Confirmation box */
+.conf-box{
+  background:var(--green-dim);border:1px solid rgba(34,197,94,.2);
+  border-radius:var(--r);padding:16px;margin-top:16px;
+}
+.conf-row{
+  display:flex;justify-content:space-between;
+  padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);
+  font-size:.83rem;
+}
+.conf-row:last-child{border:none;font-weight:700;font-size:.95rem;color:var(--gold);}
+
+/* My reservations */
+.my-resa-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r2);padding:18px;margin-bottom:14px;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  transition:border-color .2s;
+}
+.my-resa-card:hover{border-color:var(--border2);}
+
+/* Seance row */
+.seance-row{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r2);padding:16px 18px;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  margin-bottom:10px;cursor:pointer;transition:all .18s;
+}
+.seance-row:hover{border-color:rgba(232,25,44,.3);}
+.sr-time{font-family:var(--font-display);font-size:1.55rem;font-weight:700;color:var(--red);min-width:55px;}
+.sr-info{flex:1;min-width:120px;}
+.sr-title{font-weight:700;font-size:.88rem;}
+.sr-sub{font-size:.72rem;color:var(--gray);margin-top:2px;}
+.sr-dispo{text-align:right;min-width:80px;}
+
+/* Toast */
+#toast{
+  position:fixed;bottom:22px;left:50%;
+  transform:translateX(-50%) translateY(60px);
+  background:var(--bg3);border:1px solid var(--border2);
+  border-radius:var(--r);padding:11px 22px;font-size:.82rem;
+  z-index:9999;transition:transform .3s;white-space:nowrap;
+  box-shadow:var(--shadow);pointer-events:none;
+  font-weight:600;
+}
+#toast.show{transform:translateX(-50%) translateY(0);}
+#toast.ok{border-color:rgba(34,197,94,.4);color:var(--green);}
+#toast.err{border-color:rgba(232,25,44,.4);color:var(--red2);}
+#toast.inf{border-color:rgba(240,192,64,.4);color:var(--gold);}
+
+/* Empty */
+.empty{text-align:center;padding:50px 20px;color:var(--gray);}
+.empty-ico{font-size:2.8rem;margin-bottom:10px;opacity:.35;}
+
+/* Utils */
+.fl{display:flex;}.flc{align-items:center;}.flb{justify-content:space-between;}.flw{flex-wrap:wrap;}
+.g8{gap:8px;}.g12{gap:12px;}.g16{gap:16px;}
+.mb10{margin-bottom:10px;}.mb16{margin-bottom:16px;}.mb22{margin-bottom:22px;}.mb28{margin-bottom:28px;}
+.mt10{margin-top:10px;}.mt16{margin-top:16px;}
+.w100{width:100%;}.bold{font-weight:700;}
+.c-red{color:var(--red);}.c-gold{color:var(--gold);}.c-gray{color:var(--gray);}.c-green{color:var(--green);}
+.text-right{text-align:right;}
+@media(max-width:768px){
+  #sidebar{transform:translateX(-100%);}
+  #sidebar.open{transform:none;}
+  #mobile-bar{display:flex;}
+  #main{margin-left:0;padding:76px 16px 32px;}
+  #sidebar-overlay.show{display:block;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .ph-title{font-size:1.5rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     LOGIN
+══════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-header">
+      <div class="login-logo">Ciné<em>Lux</em></div>
+      <div class="login-tagline">Système de gestion cinéma</div>
+    </div>
+    <div class="login-tabs">
+      <button class="ltab on" id="ltab-admin" onclick="switchTab('admin')">🔐 Administration</button>
+      <button class="ltab" id="ltab-client" onclick="switchTab('client')">🎟 Espace Client</button>
+    </div>
+    <div class="login-body">
+      <!-- Admin -->
+      <div id="lf-admin">
+        <div class="fg"><label>Identifiant</label><input type="text" id="l-user" placeholder="Identifiant"></div>
+        <div class="fg"><label>Mot de passe</label><input type="password" id="l-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin('admin')"></div>
+        <button class="btn btn-red w100" style="justify-content:center;padding:13px;font-size:.85rem;" onclick="doLogin('admin')">Se connecter</button>
+
+      </div>
+      <!-- Client -->
+      <div id="lf-client" style="display:none">
+        <div class="fg"><label>Votre nom complet</label><input type="text" id="l-cname" placeholder="Marie Dupont"></div>
+        <div class="fg"><label>Email (optionnel)</label><input type="email" id="l-cemail" placeholder="marie@exemple.fr"></div>
+        <button class="btn btn-red w100" style="justify-content:center;padding:13px;font-size:.85rem;" onclick="doLogin('client')">Accéder au cinéma</button>
+        <div class="login-hint">Aucun compte nécessaire. Entrez votre nom pour réserver vos places.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     APP
+══════════════════════════════════════ -->
+<div id="app">
+  <!-- Mobile bar -->
+  <div id="mobile-bar">
+    <button id="menu-toggle" onclick="toggleSidebar()">☰</button>
+    <div class="mb-logo">Ciné<em>Lux</em></div>
+    <span id="mob-user" style="font-size:.75rem;color:var(--gray)"></span>
+  </div>
+  <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div class="sidebar-logo">Ciné<em>Lux</em></div>
+    <nav class="sidebar-nav" id="sidebar-nav"></nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-ava" id="s-ava">👤</div>
+        <div class="user-info">
+          <div class="uname" id="s-name">—</div>
+          <div class="urole" id="s-role">—</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost w100" style="justify-content:center;font-size:.75rem;" onclick="logout()">⏻ Déconnexion</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div id="main">
+
+    <!-- DASHBOARD -->
+    <div class="page" id="p-dashboard">
+      <div class="ph">
+        <div>
+          <div class="ph-title">Tableau de bord</div>
+          <div class="ph-sub" id="dash-date"></div>
+        </div>
+      </div>
+      <div class="stats-row" id="dash-stats"></div>
+      <div class="fl flb flw g12 mb16">
+        <div style="font-weight:700;font-size:.9rem;letter-spacing:.06em;text-transform:uppercase;color:var(--gray)">Séances du jour</div>
+      </div>
+      <div id="dash-seances"></div>
+    </div>
+
+    <!-- FILMS -->
+    <div class="page" id="p-films">
+      <div class="ph">
+        <div><div class="ph-title">Films</div><div class="ph-sub">Catalogue de programmation</div></div>
+        <button class="btn btn-red" onclick="openFilmModal()">＋ Ajouter un film</button>
+      </div>
+      <div class="film-grid" id="admin-films-grid"></div>
+    </div>
+
+    <!-- SÉANCES -->
+    <div class="page" id="p-seances">
+      <div class="ph">
+        <div><div class="ph-title">Séances</div><div class="ph-sub">Programmation des horaires</div></div>
+        <button class="btn btn-red" onclick="openSeanceModal()">＋ Nouvelle séance</button>
+      </div>
+      <div id="seances-list"></div>
+    </div>
+
+    <!-- EN COURS -->
+    <div class="page" id="p-en-cours">
+      <div class="ph">
+        <div><div class="ph-title">🔴 Séances en cours</div><div class="ph-sub">Séances actuellement diffusées ou imminentes</div></div>
+        <button class="btn btn-ghost btn-sm" onclick="renderEnCours()">↻ Actualiser</button>
+      </div>
+      <div id="encours-content"></div>
+    </div>
+
+    <!-- SALLES -->
+    <div class="page" id="p-salles">
+      <div class="ph">
+        <div><div class="ph-title">Salles</div><div class="ph-sub">Configuration des places</div></div>
+        <button class="btn btn-red" onclick="openSalleModal()">＋ Créer une salle</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px" id="salles-grid"></div>
+    </div>
+
+    <!-- RÉSERVATIONS -->
+    <div class="page" id="p-resas">
+      <div class="ph">
+        <div><div class="ph-title">Réservations</div><div class="ph-sub">Toutes les réservations</div></div>
+        <div class="fl g8">
+          <button class="btn btn-ghost btn-sm" onclick="exportCSV()">📥 CSV</button>
+          <button class="btn btn-red" onclick="openResaAdmin()">＋ Réserver</button>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th>Client</th><th>Film</th><th>Date & Heure</th>
+            <th>Salle</th><th>Places</th><th>Tarif</th><th>Total</th><th>Statut</th><th></th>
+          </tr></thead>
+          <tbody id="resas-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ADMINS -->
+    <div class="page" id="p-admins">
+      <div class="ph">
+        <div><div class="ph-title">Comptes Admin</div><div class="ph-sub">Gestion des accès</div></div>
+        <button class="btn btn-red" onclick="openAdminModal()">＋ Ajouter un compte</button>
+      </div>
+      <div class="card" id="admins-list"></div>
+    </div>
+
+    <!-- PARAMÈTRES -->
+    <div class="page" id="p-settings">
+      <div class="ph"><div class="ph-title">Paramètres</div></div>
+      <div class="card mb16">
+        <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--gray);margin-bottom:18px">Cinéma</div>
+        <div class="form-row mb16">
+          <div class="fg"><label>Nom du cinéma</label><input type="text" id="cfg-name" value="CinéLux"></div>
+          <div class="fg"><label>Adresse</label><input type="text" id="cfg-addr" placeholder="1 Rue du Cinéma, Paris"></div>
+        </div>
+        <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--gray);margin:20px 0 14px">Tarifs (€)</div>
+        <div class="form-row mb16">
+          <div class="fg"><label>Normal</label><input type="number" id="cfg-tn" value="10.50" step="0.5"></div>
+          <div class="fg"><label>VIP</label><input type="number" id="cfg-tv" value="15.00" step="0.5"></div>
+        </div>
+        <div class="form-row">
+          <div class="fg"><label>Réduit</label><input type="number" id="cfg-tr" value="7.50" step="0.5"></div>
+          <div class="fg"><label>Enfant</label><input type="number" id="cfg-te" value="5.50" step="0.5"></div>
+        </div>
+        <button class="btn btn-red mt16" onclick="saveSettings()">💾 Sauvegarder</button>
+      </div>
+    </div>
+
+    <!-- CLIENT : ACCUEIL -->
+    <div class="page" id="p-cinema">
+      <div class="c-hero">
+        <div class="c-hero-title" id="c-welcome">Bienvenue !</div>
+        <div class="c-hero-sub">Découvrez la programmation et réservez vos places en quelques clics</div>
+      </div>
+      <div class="fl flb flw g12 mb16 flc">
+        <div style="font-weight:700;font-size:.88rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gray)">🎬 À l'affiche</div>
+        <input type="text" id="c-search" placeholder="Rechercher un film…" oninput="renderCinema()" style="padding:8px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--white);font-size:.82rem;outline:none;width:200px;">
+      </div>
+      <div class="film-grid" id="client-films-grid"></div>
+    </div>
+
+    <!-- CLIENT : MES RÉSERVATIONS -->
+    <div class="page" id="p-mes-resas">
+      <div class="ph">
+        <div><div class="ph-title">Mes Réservations</div><div class="ph-sub" id="mes-sub"></div></div>
+      </div>
+      <div id="mes-resas-list"></div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══════════════════════════════════════
+     MODALS
+══════════════════════════════════════ -->
+
+<!-- Film modal -->
+<div class="overlay" id="m-film">
+  <div class="modal modal-md">
+    <div class="mhd"><div class="mtitle" id="mf-title">Film</div><button class="mclose" onclick="closeModal('m-film')">✕</button></div>
+    <input type="hidden" id="mf-id">
+    <div class="fg"><label>Titre du film</label><input type="text" id="mf-titre" placeholder="Ex : Dune — Partie III"></div>
+    <div class="form-row">
+      <div class="fg"><label>Durée (min)</label><input type="number" id="mf-duree" placeholder="155" min="1"></div>
+      <div class="fg"><label>Genre</label>
+        <select id="mf-genre">
+          <option>Science-Fiction</option><option>Action</option><option>Comédie</option>
+          <option>Drame</option><option>Horreur</option><option>Romance</option>
+          <option>Animation</option><option>Thriller</option><option>Documentaire</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Réalisateur</label><input type="text" id="mf-real" placeholder="Denis Villeneuve"></div>
+      <div class="fg"><label>Classification</label>
+        <select id="mf-classif"><option>Tous publics</option><option>-10</option><option>-12</option><option>-16</option><option>-18</option></select>
+      </div>
+    </div>
+    <div class="fg"><label>Émoji affiché</label><input type="text" id="mf-emoji" placeholder="🚀" maxlength="4" style="font-size:1.3rem;max-width:100px"></div>
+    <div class="fl" style="justify-content:flex-end;gap:10px;margin-top:18px">
+      <button class="btn btn-ghost" onclick="closeModal('m-film')">Annuler</button>
+      <button class="btn btn-red" onclick="saveFilm()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Séance modal -->
+<div class="overlay" id="m-seance">
+  <div class="modal modal-md">
+    <div class="mhd"><div class="mtitle" id="ms-title">Séance</div><button class="mclose" onclick="closeModal('m-seance')">✕</button></div>
+    <input type="hidden" id="ms-id">
+    <div class="fg"><label>Film</label><select id="ms-film"></select></div>
+    <div class="fg"><label>Salle</label><select id="ms-salle"></select></div>
+    <div class="form-row">
+      <div class="fg"><label>Date</label><input type="date" id="ms-date"></div>
+      <div class="fg"><label>Heure</label><input type="time" id="ms-heure"></div>
+    </div>
+    <div class="fg"><label>Version</label>
+      <select id="ms-langue"><option>VF</option><option>VOSTFR</option><option>VO</option><option>IMAX</option><option>4DX</option><option>3D</option></select>
+    </div>
+    <div class="fl" style="justify-content:flex-end;gap:10px;margin-top:18px">
+      <button class="btn btn-ghost" onclick="closeModal('m-seance')">Annuler</button>
+      <button class="btn btn-red" onclick="saveSeance()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Salle modal (create/edit structure) -->
+<div class="overlay" id="m-salle">
+  <div class="modal modal-md">
+    <div class="mhd"><div class="mtitle" id="msl-title">Salle</div><button class="mclose" onclick="closeModal('m-salle')">✕</button></div>
+    <input type="hidden" id="msl-id">
+    <div class="fg"><label>Nom de la salle</label><input type="text" id="msl-nom" placeholder="Salle 1 — Grand Rex"></div>
+    <div class="form-row">
+      <div class="fg"><label>Nombre de rangées</label><input type="number" id="msl-rows" value="8" min="1" max="26"></div>
+      <div class="fg"><label>Places par rangée</label><input type="number" id="msl-cols" value="12" min="1" max="40"></div>
+    </div>
+    <div class="fg"><label>Rangées VIP (ex: A,B)</label><input type="text" id="msl-vip" placeholder="A,B"></div>
+    <div class="fl" style="justify-content:flex-end;gap:10px;margin-top:18px">
+      <button class="btn btn-ghost" onclick="closeModal('m-salle')">Annuler</button>
+      <button class="btn btn-red" onclick="saveSalle()">Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Salle edit places (seat-level) -->
+<div class="overlay" id="m-salle-edit">
+  <div class="modal modal-lg">
+    <div class="mhd">
+      <div>
+        <div class="mtitle" id="mse-title">Modifier les places</div>
+        <div style="font-size:.72rem;color:var(--gray);margin-top:3px">Cliquez sur une place pour changer son type</div>
+      </div>
+      <button class="mclose" onclick="closeModal('m-salle-edit')">✕</button>
+    </div>
+    <div class="emode-bar">
+      <button class="emode-btn em-n active" id="emb-n" onclick="setEM('n')">🪑 Normal</button>
+      <button class="emode-btn em-v" id="emb-v" onclick="setEM('v')">⭐ VIP</button>
+      <button class="emode-btn em-d" id="emb-d" onclick="setEM('d')">✕ Désactiver</button>
+    </div>
+    <div class="card" style="padding:14px;overflow-x:auto;background:var(--bg3);"><div id="mse-grid"></div></div>
+    <div class="fl g16 mt10 flw" id="mse-stats" style="font-size:.78rem;color:var(--gray)"></div>
+    <hr>
+    <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray);margin-bottom:10px">Ajouter / Supprimer</div>
+    <div class="fl g8 flw">
+      <button class="btn btn-ghost btn-sm" onclick="salle_addRow()">＋ Rangée</button>
+      <button class="btn btn-danger btn-sm" onclick="salle_remRow()">− Rangée</button>
+      <button class="btn btn-ghost btn-sm" onclick="salle_addCol()">＋ Colonne</button>
+      <button class="btn btn-danger btn-sm" onclick="salle_remCol()">− Colonne</button>
+    </div>
+    <div class="fl" style="justify-content:flex-end;margin-top:18px">
+      <button class="btn btn-red" onclick="closeModal('m-salle-edit');renderSalles();">Fermer & Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<!-- Réservation admin -->
+<div class="overlay" id="m-resa-admin">
+  <div class="modal modal-lg">
+    <div class="mhd"><div class="mtitle" id="mra-title">Réservation</div><button class="mclose" onclick="closeModal('m-resa-admin')">✕</button></div>
+    <input type="hidden" id="mra-id">
+    <div class="form-row">
+      <div class="fg"><label>Nom du client</label><input type="text" id="mra-client" placeholder="Marie Dupont"></div>
+      <div class="fg"><label>Tarif</label>
+        <select id="mra-tarif">
+          <option value="normal">Normal</option><option value="reduit">Réduit</option>
+          <option value="enfant">Enfant</option><option value="vip">VIP</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label>Séance</label><select id="mra-seance" onchange="buildPicker('mra')"></select></div>
+    <div class="fg">
+      <label>Places <span id="mra-cnt" class="c-red"></span></label>
+      <div id="mra-picker" style="overflow-x:auto;margin-top:8px"></div>
+    </div>
+    <div class="fl" style="justify-content:flex-end;gap:10px;margin-top:18px">
+      <button class="btn btn-ghost" onclick="closeModal('m-resa-admin')">Annuler</button>
+      <button class="btn btn-red" onclick="saveResa('admin')">Réserver</button>
+    </div>
+  </div>
+</div>
+
+<!-- Réservation client -->
+<div class="overlay" id="m-resa-client">
+  <div class="modal modal-lg">
+    <div class="mhd">
+      <div>
+        <div class="mtitle" id="mrc-title">Réserver</div>
+        <div class="c-gray" style="font-size:.75rem;margin-top:2px" id="mrc-sub"></div>
+      </div>
+      <button class="mclose" onclick="closeModal('m-resa-client')">✕</button>
+    </div>
+    <input type="hidden" id="mrc-sid">
+    <div class="fg"><label>Tarif</label>
+      <select id="mrc-tarif" onchange="updateConfBox()">
+        <option value="normal">Normal</option><option value="reduit">Réduit</option>
+        <option value="enfant">Enfant</option><option value="vip">VIP (places ⭐ seulement)</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Sélectionnez vos places <span id="mrc-cnt" class="c-red"></span></label>
+      <div id="mrc-picker" style="overflow-x:auto;margin-top:8px"></div>
+    </div>
+    <div id="mrc-conf"></div>
+    <div class="fl" style="justify-content:flex-end;gap:10px;margin-top:18px">
+      <button class="btn btn-ghost" onclick="closeModal('m-resa-client')">Annuler</button>
+      <button class="btn btn-red" onclick="saveResa('client')">✓ Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin account modal -->
+<div class="overlay" id="m-admin">
+  <div class="modal modal-sm">
+    <div class="mhd"><div class="mtitle" id="ma-title">Compte Admin</div><button class="mclose" onclick="closeModal('m-admin')">✕</button></div>
+    <input type="hidden" id="ma-id">
+    <div class="fg"><label>Nom complet</label><input type="text" id="ma-name" placeholder="Jean Dupont"></div>
+    <div class="fg"><label>Identifiant</label><input type="text" id="ma-user" placeholder="jdupont"></div>
+    <div class="fg"><label>Mot de passe</label><input type="password" id="ma-pass" placeholder="••••••••"></div>
+    <div class="fg"><label>Rôle</label>
+      <select id="ma-role"><option value="superadmin">Super Admin</option><option value="admin">Administrateur</option><option value="gerant">Gérant</option></select>
+    </div>
+    <div class="fl" style="justify-content:flex-end;gap:10px;margin-top:18px">
+      <button class="btn btn-ghost" onclick="closeModal('m-admin')">Annuler</button>
+      <button class="btn btn-red" onclick="saveAdmin()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Plan salle (view only) -->
+<div class="overlay" id="m-plan">
+  <div class="modal modal-lg">
+    <div class="mhd"><div class="mtitle" id="mpl-title">Plan de salle</div><button class="mclose" onclick="closeModal('m-plan')">✕</button></div>
+    <div id="mpl-content"></div>
+    <div class="fl" style="justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-ghost" onclick="closeModal('m-plan')">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+/* ═══════════════ CONSTANTS ═══════════════ */
+const ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const GENRE_EMO = {
+  'Science-Fiction':'🚀','Action':'💥','Comédie':'😂','Drame':'🎭',
+  'Horreur':'👻','Romance':'💕','Animation':'🌟','Thriller':'🔪','Documentaire':'📽️'
+};
+const POSTERS = [
+  'linear-gradient(135deg,#1a0a30 0%,#0d0020 100%)',
+  'linear-gradient(135deg,#0a1a10 0%,#041a08 100%)',
+  'linear-gradient(135deg,#1a0808 0%,#200505 100%)',
+  'linear-gradient(135deg,#0a0a1a 0%,#050515 100%)',
+  'linear-gradient(135deg,#1a1008 0%,#180c02 100%)',
+  'linear-gradient(135deg,#081820 0%,#031520 100%)',
+];
+
+/* ═══════════════ STATE ═══════════════ */
+let db = {
+  admins: [
+    {id:1, name:'Lucas Gavoille', user:'Lucas.gavoille', pass:'Lulu2011', role:'superadmin'},
+  ],
+  films: [
+    {id:1,titre:'Dune: Messiah',duree:165,genre:'Science-Fiction',real:'Denis Villeneuve',classif:'Tous publics',emoji:'🏜️'},
+    {id:2,titre:'The Dark Forest',duree:148,genre:'Science-Fiction',real:'Liu Cixin',classif:'-12',emoji:'🌲'},
+    {id:3,titre:'Komorebi',duree:112,genre:'Drame',real:'H. Kore-eda',classif:'Tous publics',emoji:'🍃'},
+    {id:4,titre:'Neon City',duree:130,genre:'Action',real:'Chad Stahelski',classif:'-12',emoji:'⚡'},
+    {id:5,titre:'La Dernière Valse',duree:98,genre:'Romance',real:'Sofia Coppola',classif:'Tous publics',emoji:'💃'},
+  ],
+  salles: [
+    {id:1, nom:'Salle 1 — Lumière', seats:mkSeats(8,12,['A','B'])},
+    {id:2, nom:'Salle 2 — Méliès',  seats:mkSeats(6,10,['A'])},
+    {id:3, nom:'Salle 3 — Truffaut',seats:mkSeats(5,8,[])},
+  ],
+  seances: [
+    {id:1,filmId:1,salleId:1,date:td(0),heure:'14:30',langue:'VOSTFR'},
+    {id:2,filmId:2,salleId:2,date:td(0),heure:'17:00',langue:'VF'},
+    {id:3,filmId:3,salleId:3,date:td(0),heure:'19:30',langue:'VF'},
+    {id:4,filmId:4,salleId:1,date:td(0),heure:'21:15',langue:'VF'},
+    {id:5,filmId:5,salleId:2,date:td(1),heure:'16:00',langue:'VF'},
+    {id:6,filmId:1,salleId:3,date:td(1),heure:'20:00',langue:'IMAX'},
+  ],
+  resas: [
+    {id:1,client:'Alice Martin',seanceId:1,seats:['A1','A2'],tarif:'vip',statut:'confirmé'},
+    {id:2,client:'Bob Durand',seanceId:1,seats:['C5','C6'],tarif:'normal',statut:'confirmé'},
+    {id:3,client:'Clara Petit',seanceId:2,seats:['B3'],tarif:'reduit',statut:'confirmé'},
+    {id:4,client:'David Roy',seanceId:3,seats:['D2','D3'],tarif:'enfant',statut:'en attente'},
+    {id:5,client:'Emma Blanc',seanceId:4,seats:['A9'],tarif:'vip',statut:'confirmé'},
+  ],
+  settings: {name:'CinéLux',addr:'',tn:10.5,tv:15,tr:7.5,te:5.5},
+  nid: {admin:3,film:6,salle:4,seance:7,resa:6}
+};
+
+// ═══════════════ PERSISTENCE ═══════════════
+function saveDB(){
+  try{localStorage.setItem('cinelux_db', JSON.stringify(db));}catch(e){}
+}
+function loadDB(){
+  try{
+    const raw=localStorage.getItem('cinelux_db');
+    if(raw){
+      const saved=JSON.parse(raw);
+      // merge to keep structure intact
+      db=Object.assign(db, saved);
+    }
+  }catch(e){}
+}
+loadDB();
+
+let session = {role:null, name:null, user:null};
+let editSalleId = null, editMode = 'n';
+let selSeats = [], pickerSalleId = null, pickerSeanceId = null;
+
+/* ═══════════════ UTILS ═══════════════ */
+const $  = id => document.getElementById(id);
+const g  = () => new Date().toISOString().split('T')[0];
+function td(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().split('T')[0];}
+function mkSeats(r,c,vip){return Array.from({length:r},(_,i)=>Array.from({length:c},()=>vip.includes(ABC[i])?'v':'n'));}
+function film(id){return db.films.find(f=>f.id===id);}
+function salle(id){return db.salles.find(s=>s.id===id);}
+function seance(id){return db.seances.find(s=>s.id===id);}
+function price(t){const s=db.settings;return {normal:s.tn,vip:s.tv,reduit:s.tr,enfant:s.te}[t]||s.tn;}
+function takenSeats(sid){return db.resas.filter(r=>r.seanceId===sid).flatMap(r=>r.seats);}
+function totalActive(sl){return sl.seats.flat().filter(t=>t!=='d').length;}
+function vipCount(sl){return sl.seats.flat().filter(t=>t==='v').length;}
+function fmtDate(d){try{return new Date(d+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});}catch{return d;}}
+function sidKey(r,c){return `${ABC[r]}${c+1}`;}
+
+function toast(msg,type='ok'){
+  const el=$('toast');el.textContent=msg;el.className=`show ${type}`;
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+/* ═══════════════ LOGIN ═══════════════ */
+function switchTab(t){
+  $('ltab-admin').classList.toggle('on',t==='admin');
+  $('ltab-client').classList.toggle('on',t==='client');
+  $('lf-admin').style.display=t==='admin'?'block':'none';
+  $('lf-client').style.display=t==='client'?'block':'none';
+}
+
+function doLogin(type){
+  if(type==='admin'){
+    const u=$('l-user').value.trim(), p=$('l-pass').value;
+    const acc=db.admins.find(a=>a.user===u&&a.pass===p);
+    if(!acc){toast('Identifiants incorrects','err');return;}
+    session={role:'admin',name:acc.name,user:acc.user,adminId:acc.id,adminRole:acc.role};
+  } else {
+    const name=$('l-cname').value.trim();
+    if(!name){toast('Entrez votre nom','err');return;}
+    session={role:'client',name,user:null};
+  }
+  $('login-screen').style.display='none';
+  $('app').style.display='block';
+  initApp();
+}
+
+function logout(){
+  session={role:null,name:null,user:null};
+  $('app').style.display='none';
+  $('login-screen').style.display='flex';
+  closeSidebar();
+}
+
+/* ═══════════════ APP INIT ═══════════════ */
+const ADMIN_NAV = [
+  {section:'Gestion'},
+  {id:'dashboard',ico:'📊',label:'Tableau de bord'},
+  {id:'films',ico:'🎞',label:'Films'},
+  {id:'seances',ico:'🕐',label:'Séances'},
+  {id:'en-cours',ico:'🔴',label:'En cours'},
+  {id:'salles',ico:'🏟',label:'Salles & Places'},
+  {id:'resas',ico:'🎟',label:'Réservations'},
+  {section:'Configuration'},
+  {id:'admins',ico:'👥',label:'Comptes Admin'},
+  {id:'settings',ico:'⚙️',label:'Paramètres'},
+];
+const CLIENT_NAV = [
+  {section:'Cinéma'},
+  {id:'cinema',ico:'🎬',label:'Programmation'},
+  {id:'mes-resas',ico:'🎟',label:'Mes Réservations'},
+];
+
+function initApp(){
+  const nav = session.role==='admin' ? ADMIN_NAV : CLIENT_NAV;
+  $('sidebar-nav').innerHTML = nav.map(n=>{
+    if(n.section) return `<div class="snav-section">${n.section}</div>`;
+    return `<button class="snav-btn" id="snav-${n.id}" onclick="showPage('${n.id}')">${`<span class="ico">${n.ico}</span>${n.label}`}</button>`;
+  }).join('');
+  $('s-name').textContent = session.name;
+  $('s-role').textContent = session.adminRole || 'Client';
+  $('s-ava').textContent = session.role==='admin' ? '🔐' : '🎟';
+  $('mob-user').textContent = session.name;
+  showPage(session.role==='admin' ? 'dashboard' : 'cinema');
+}
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.snav-btn').forEach(b=>b.classList.remove('on'));
+  const p=$(`p-${id}`);if(p)p.classList.add('on');
+  const nb=$(`snav-${id}`);if(nb)nb.classList.add('on');
+  renderPage(id);
+  closeSidebar();
+}
+
+function renderPage(id){
+  ({
+    dashboard:renderDash, films:renderFilms, seances:renderSeances,
+    salles:renderSalles, resas:renderResas, admins:renderAdmins,
+    cinema:renderCinema, 'mes-resas':renderMesResas, 'en-cours':renderEnCours,
+  }[id]||(() => {}))();
+}
+
+/* ═══════════════ SIDEBAR MOBILE ═══════════════ */
+function toggleSidebar(){
+  $('sidebar').classList.toggle('open');
+  $('sidebar-overlay').classList.toggle('show');
+}
+function closeSidebar(){
+  $('sidebar').classList.remove('open');
+  $('sidebar-overlay').classList.remove('show');
+}
+
+/* ═══════════════ DASHBOARD ═══════════════ */
+function renderDash(){
+  $('dash-date').textContent = new Date().toLocaleDateString('fr-FR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const today = g();
+  const todayS = db.seances.filter(s=>s.date===today);
+  const rev = db.resas.reduce((a,r)=>a+price(r.tarif)*r.seats.length,0);
+  $('dash-stats').innerHTML = [
+    {ico:'🎬',cls:'s-r',val:db.films.length,lbl:'Films'},
+    {ico:'🕐',cls:'s-b',val:todayS.length,lbl:'Séances aujourd\'hui'},
+    {ico:'🎟',cls:'s-g',val:db.resas.length,lbl:'Réservations'},
+    {ico:'💰',cls:'s-o',val:rev.toFixed(0)+'€',lbl:'Revenus'},
+  ].map(s=>`<div class="stat"><div class="stat-ico ${s.cls}">${s.ico}</div><div><div class="stat-val">${s.val}</div><div class="stat-lbl">${s.lbl}</div></div></div>`).join('');
+  if(!todayS.length){
+    $('dash-seances').innerHTML=`<div class="empty"><div class="empty-ico">🎥</div>Aucune séance aujourd'hui</div>`;
+    return;
+  }
+  $('dash-seances').innerHTML = todayS.map(s=>seanceRowHTML(s,false)).join('');
+}
+
+/* ═══════════════ FILMS ═══════════════ */
+function renderFilms(){
+  if(!db.films.length){$('admin-films-grid').innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="empty-ico">🎞</div>Aucun film</div>`;return;}
+  $('admin-films-grid').innerHTML = db.films.map((f,i)=>`
+    <div class="film-card">
+      <div class="film-poster" style="background:${POSTERS[i%POSTERS.length]}">
+        ${f.emoji||GENRE_EMO[f.genre]||'🎬'}
+        <div class="film-badge">${f.genre}</div>
+      </div>
+      <div class="film-body">
+        <div class="film-name">${f.titre}</div>
+        <div class="film-meta mb10">${f.duree} min · ${f.real}</div>
+        <div class="fl flb flc">
+          <span class="tag tb">${f.classif}</span>
+          <div class="fl g8">
+            <button class="btn btn-gold btn-xs" onclick="openFilmModal(${f.id})" title="Modifier">✏️</button>
+            <button class="btn btn-danger btn-xs" onclick="delFilm(${f.id})" title="Supprimer">🗑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openFilmModal(id){
+  $('mf-id').value = id||'';
+  if(id){
+    const f=film(id);
+    $('mf-title').textContent='Modifier le film';
+    $('mf-titre').value=f.titre; $('mf-duree').value=f.duree;
+    $('mf-genre').value=f.genre; $('mf-real').value=f.real;
+    $('mf-classif').value=f.classif; $('mf-emoji').value=f.emoji||'';
+  } else {
+    $('mf-title').textContent='Ajouter un film';
+    $('mf-titre').value=''; $('mf-duree').value=''; $('mf-real').value=''; $('mf-emoji').value='';
+  }
+  openModal('m-film');
+}
+
+function saveFilm(){
+  const titre=$('mf-titre').value.trim(), duree=parseInt($('mf-duree').value);
+  if(!titre||!duree){toast('Titre et durée requis','err');return;}
+  const id=parseInt($('mf-id').value)||0;
+  const obj={titre,duree,genre:$('mf-genre').value,real:$('mf-real').value.trim(),classif:$('mf-classif').value,emoji:$('mf-emoji').value||GENRE_EMO[$('mf-genre').value]||'🎬'};
+  if(id){Object.assign(film(id),obj);}
+  else{db.films.push({id:db.nid.film++,...obj});}
+  closeModal('m-film');saveDB();renderFilms();toast('Film enregistré ✓');
+}
+
+function delFilm(id){
+  const seanceIds=db.seances.filter(s=>s.filmId===id).map(s=>s.id);
+  db.films=db.films.filter(f=>f.id!==id);
+  db.seances=db.seances.filter(s=>s.filmId!==id);
+  db.resas=db.resas.filter(r=>!seanceIds.includes(r.seanceId));
+  saveDB();renderFilms();toast('Film supprimé','err');
+}
+
+/* ═══════════════ SÉANCES ═══════════════ */
+function seanceRowHTML(s, editable=true){
+  const f=film(s.filmId), sl=salle(s.salleId);
+  if(!f||!sl) return '';
+  const taken=takenSeats(s.id).length, tot=totalActive(sl);
+  const pct=Math.min(100,Math.round(taken/tot*100));
+  const pc=pct>=100?'p-r':pct>=70?'p-o':'p-g';
+  return `
+    <div class="seance-row" onclick="showPlan(${s.id})">
+      <div class="sr-time">${s.heure}</div>
+      <div style="font-size:1.4rem">${f.emoji||'🎬'}</div>
+      <div class="sr-info">
+        <div class="sr-title">${f.titre}</div>
+        <div class="sr-sub">${sl.nom} · <span class="tag ty" style="font-size:.62rem">${s.langue}</span></div>
+        <div class="sr-sub">📅 ${fmtDate(s.date)}</div>
+      </div>
+      <div class="sr-dispo">
+        <div style="font-size:.75rem;color:var(--gray);margin-bottom:4px">${taken}/${tot}</div>
+        <div class="pbar" style="width:70px;margin:0 0 3px auto"><div class="pfill ${pc}" style="width:${pct}%"></div></div>
+        <div style="font-size:.68rem;color:var(--gray)">${pct}%</div>
+      </div>
+      ${editable?`
+        <button class="btn btn-gold btn-xs" onclick="event.stopPropagation();openSeanceModal(${s.id})" title="Modifier">✏️</button>
+        <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();delSeance(${s.id})" title="Supprimer">🗑</button>
+      `:''}
+    </div>`;
+}
+
+function renderSeances(){
+  if(!db.seances.length){$('seances-list').innerHTML=`<div class="empty"><div class="empty-ico">🕐</div>Aucune séance</div>`;return;}
+  const sorted=[...db.seances].sort((a,b)=>a.date.localeCompare(b.date)||a.heure.localeCompare(b.heure));
+  let html='',lastDate='';
+  sorted.forEach(s=>{
+    if(s.date!==lastDate){
+      if(lastDate)html+='<hr>';
+      html+=`<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--gray);margin-bottom:10px">📅 ${fmtDate(s.date)}</div>`;
+      lastDate=s.date;
+    }
+    html+=seanceRowHTML(s,true);
+  });
+  $('seances-list').innerHTML=html;
+}
+
+function openSeanceModal(id){
+  $('ms-film').innerHTML=db.films.map(f=>`<option value="${f.id}">${f.emoji} ${f.titre}</option>`).join('');
+  $('ms-salle').innerHTML=db.salles.map(s=>`<option value="${s.id}">${s.nom}</option>`).join('');
+  $('ms-id').value=id||'';
+  if(id){
+    const s=seance(id);
+    $('ms-title').textContent='Modifier la séance';
+    $('ms-film').value=s.filmId; $('ms-salle').value=s.salleId;
+    $('ms-date').value=s.date; $('ms-heure').value=s.heure; $('ms-langue').value=s.langue;
+  } else {
+    $('ms-title').textContent='Nouvelle séance';
+    $('ms-date').value=g(); $('ms-heure').value='20:00';
+  }
+  openModal('m-seance');
+}
+
+function saveSeance(){
+  const filmId=parseInt($('ms-film').value), salleId=parseInt($('ms-salle').value);
+  const date=$('ms-date').value, heure=$('ms-heure').value;
+  if(!filmId||!salleId||!date||!heure){toast('Tous les champs sont requis','err');return;}
+  const id=parseInt($('ms-id').value)||0;
+  const obj={filmId,salleId,date,heure,langue:$('ms-langue').value};
+  if(id){Object.assign(seance(id),obj);}
+  else{db.seances.push({id:db.nid.seance++,...obj});}
+  closeModal('m-seance');saveDB();renderSeances();toast('Séance enregistrée ✓');
+}
+
+function delSeance(id){
+  db.seances=db.seances.filter(s=>s.id!==id);
+  db.resas=db.resas.filter(r=>r.seanceId!==id);
+  saveDB();renderSeances();toast('Séance supprimée','err');
+}
+
+/* ═══════════════ SALLES ═══════════════ */
+function getSalleStatus(salleId){
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+  const currentMin = now.getHours()*60 + now.getMinutes();
+  const todaySeances = db.seances.filter(s=>s.salleId===salleId && s.date===todayStr);
+  for(const s of todaySeances){
+    const f = film(s.filmId);
+    const [h,m] = s.heure.split(':').map(Number);
+    const start = h*60+m;
+    const end = start + (f?f.duree:90);
+    const diff = start - currentMin;
+    if(currentMin >= start && currentMin < end){
+      const elapsed = currentMin - start;
+      const total = end - start;
+      const pct = Math.min(100,Math.round(elapsed/total*100));
+      const remaining = end - currentMin;
+      return {status:'encours', seance:s, film:f, pct, remaining};
+    }
+    if(diff > 0 && diff <= 45){
+      return {status:'imminent', seance:s, film:f, diff};
+    }
+  }
+  const next = todaySeances
+    .map(s=>{ const [h,m]=s.heure.split(':').map(Number); return {s, start:h*60+m}; })
+    .filter(x=>x.start > currentMin)
+    .sort((a,b)=>a.start-b.start)[0];
+  if(next) return {status:'prochain', seance:next.s, film:film(next.s.filmId)};
+  return {status:'libre'};
+}
+
+function renderSalles(){
+  if(!db.salles.length){$('salles-grid').innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="empty-ico">🏟</div>Aucune salle</div>`;return;}
+  $('salles-grid').innerHTML = db.salles.map(sl=>{
+    const tot=totalActive(sl), vip=vipCount(sl), dis=sl.seats.flat().filter(t=>t==='d').length;
+    const st = getSalleStatus(sl.id);
+    let statusBar = '', cardBorder = '';
+    if(st.status==='encours'){
+      cardBorder = 'border-color:rgba(232,25,44,.5);';
+      statusBar = `
+        <div style="background:rgba(232,25,44,.08);border:1px solid rgba(232,25,44,.2);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+          <div class="fl flb flc" style="margin-bottom:8px">
+            <div class="fl flc g8">
+              <span style="animation:blink 1.2s infinite">🔴</span>
+              <span style="font-weight:700;font-size:.85rem">EN COURS</span>
+            </div>
+            <span style="font-size:.75rem;color:var(--gray)">${st.remaining} min restantes</span>
+          </div>
+          <div style="font-weight:700;font-size:.95rem;margin-bottom:2px">${st.film?st.film.emoji+' '+st.film.titre:'?'}</div>
+          <div style="font-size:.72rem;color:var(--gray);margin-bottom:8px">${st.seance.heure} · ${st.seance.langue}${st.film?' · '+st.film.duree+' min':''}</div>
+          <div style="font-size:.68rem;color:var(--gray);margin-bottom:4px;display:flex;justify-content:space-between"><span>Progression</span><span>${st.pct}%</span></div>
+          <div class="pbar"><div class="pfill p-r" style="width:${st.pct}%"></div></div>
+        </div>`;
+    } else if(st.status==='imminent'){
+      cardBorder = 'border-color:rgba(240,192,64,.4);';
+      statusBar = `
+        <div style="background:rgba(240,192,64,.06);border:1px solid rgba(240,192,64,.2);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+          <div class="fl flc g8" style="margin-bottom:6px">
+            <span>⏳</span>
+            <span style="font-weight:700;font-size:.8rem;color:var(--gold)">PROCHAINE SÉANCE DANS ${st.diff} MIN</span>
+          </div>
+          <div style="font-weight:700;font-size:.9rem">${st.film?st.film.emoji+' '+st.film.titre:'?'}</div>
+          <div style="font-size:.72rem;color:var(--gray);margin-top:2px">${st.seance.heure} · ${st.seance.langue}</div>
+        </div>`;
+    } else if(st.status==='prochain'){
+      statusBar = `
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px">
+          <div class="fl flc g8">
+            <span>🕐</span>
+            <div>
+              <div style="font-size:.7rem;color:var(--gray)">Prochaine séance</div>
+              <div style="font-weight:700;font-size:.85rem">${st.film?st.film.emoji+' '+st.film.titre:'?'} — ${st.seance.heure}</div>
+            </div>
+          </div>
+        </div>`;
+    } else {
+      statusBar = `
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px">
+          <div class="fl flc g8">
+            <span>✅</span>
+            <span style="font-size:.8rem;color:var(--gray)">Salle libre — aucune séance aujourd'hui</span>
+          </div>
+        </div>`;
+    }
+    const taken = st.seance ? takenSeats(st.seance.id).length : 0;
+    const occPct = tot>0 && st.seance ? Math.min(100,Math.round(taken/tot*100)) : 0;
+    const pc = occPct>=100?'p-r':occPct>=70?'p-o':'p-g';
+    return `
+      <div class="card" style="${cardBorder}">
+        <div class="fl flb flc mb14">
+          <div>
+            <div style="font-weight:700;font-size:1rem">${sl.nom}</div>
+            <div class="c-gray" style="font-size:.72rem;margin-top:2px">${tot} places · ${sl.seats.length}×${sl.seats[0]?.length||0}</div>
+          </div>
+          <div class="fl g8">
+            <button class="btn btn-gold btn-sm" onclick="openSalleEdit(${sl.id})">✏️ Modifier</button>
+            <button class="btn btn-danger btn-xs" onclick="delSalle(${sl.id})">🗑</button>
+          </div>
+        </div>
+        ${statusBar}
+        ${st.seance ? `<div class="fl flb flc" style="font-size:.75rem;color:var(--gray);margin-bottom:5px"><span>${taken}/${tot} places</span><span>${occPct}%</span></div><div class="pbar mb14"><div class="pfill ${pc}" style="width:${occPct}%"></div></div>` : ''}
+        <div class="fl g8 flw mb14">
+          <span class="tag tb">🪑 ${tot-vip} Standard</span>
+          <span class="tag ty">⭐ ${vip} VIP</span>
+          ${dis?`<span class="tag tr">✕ ${dis} Off</span>`:''}
+        </div>
+        <details>
+          <summary style="font-size:.72rem;color:var(--gray);cursor:pointer;user-select:none">▸ Voir le plan de salle</summary>
+          <div style="overflow-x:auto;margin-top:10px">${buildMap(sl, st.seance?st.seance.id:null, [], false, 'prev'+sl.id)}</div>
+        </details>
+      </div>`;
+  }).join('');
+  clearTimeout(window._sallesTimer);
+  window._sallesTimer = setTimeout(()=>{ if($('p-salles').classList.contains('on')) renderSalles(); }, 60000);
+}
+
+
+
+function openSalleModal(id){
+  $('msl-id').value=id||'';
+  if(id){
+    const sl=salle(id);
+    $('msl-title').textContent='Modifier la salle';
+    $('msl-nom').value=sl.nom;
+  } else {
+    $('msl-title').textContent='Créer une salle';
+    $('msl-nom').value=''; $('msl-rows').value=8; $('msl-cols').value=12; $('msl-vip').value='';
+  }
+  openModal('m-salle');
+}
+
+function saveSalle(){
+  const nom=$('msl-nom').value.trim();
+  const rows=parseInt($('msl-rows').value), cols=parseInt($('msl-cols').value);
+  if(!nom||!rows||!cols){toast('Tous les champs sont requis','err');return;}
+  const vipR=$('msl-vip').value.toUpperCase().split(',').map(v=>v.trim()).filter(Boolean);
+  const id=parseInt($('msl-id').value)||0;
+  if(id){
+    const sl=salle(id); sl.nom=nom;
+  } else {
+    db.salles.push({id:db.nid.salle++,nom,seats:mkSeats(rows,cols,vipR)});
+  }
+  closeModal('m-salle');saveDB();renderSalles();toast('Salle enregistrée ✓');
+}
+
+function delSalle(id){
+  db.salles=db.salles.filter(s=>s.id!==id);
+  saveDB();renderSalles();toast('Salle supprimée','err');
+}
+
+/* ── Seat edit ── */
+function openSalleEdit(id){
+  editSalleId=id; editMode='n';
+  updateEMUI();
+  renderEditGrid();
+  $('mse-title').textContent='Modifier — '+salle(id).nom;
+  openModal('m-salle-edit');
+}
+function setEM(m){editMode=m;updateEMUI();}
+function updateEMUI(){
+  ['n','v','d'].forEach(m=>{
+    const b=$(`emb-${m}`);if(b)b.classList.toggle('active',editMode===m);
+  });
+}
+function renderEditGrid(){
+  const sl=salle(editSalleId);
+  let html=`<div class="seat-wrap"><div class="screen">🎬 ÉCRAN</div>`;
+  sl.seats.forEach((row,ri)=>{
+    html+=`<div class="srow"><div class="rlbl">${ABC[ri]}</div>`;
+    row.forEach((t,ci)=>{
+      const cls=t==='n'?'en':t==='v'?'ev':'ed';
+      html+=`<button class="edit-s ${cls}" onclick="flipSeat(${ri},${ci})" title="${sidKey(ri,ci)} (${t==='n'?'Normal':t==='v'?'VIP':'Off'})"></button>`;
+    });
+    html+=`</div>`;
+  });
+  html+=`</div>`;
+  $('mse-grid').innerHTML=html;
+  const flat=sl.seats.flat();
+  $('mse-stats').innerHTML=`
+    <span>🪑 ${flat.filter(t=>t==='n').length} Normal</span>
+    <span>⭐ ${flat.filter(t=>t==='v').length} VIP</span>
+    <span>✕ ${flat.filter(t=>t==='d').length} Désactivées</span>
+    <span class="c-gold bold">Total actif: ${flat.filter(t=>t!=='d').length}</span>
+  `;
+}
+function flipSeat(ri,ci){
+  const sl=salle(editSalleId);
+  sl.seats[ri][ci]=editMode;
+  renderEditGrid();
+  saveDB();
+}
+function salle_addRow(){
+  const sl=salle(editSalleId);
+  sl.seats.push(Array(sl.seats[0]?.length||10).fill('n'));
+  saveDB();renderEditGrid();toast('Rangée ajoutée ✓');
+}
+function salle_remRow(){
+  const sl=salle(editSalleId);
+  if(sl.seats.length<=1){toast('Minimum 1 rangée','err');return;}
+  sl.seats.pop();saveDB();renderEditGrid();toast('Rangée retirée');
+}
+function salle_addCol(){
+  const sl=salle(editSalleId);
+  sl.seats.forEach(r=>r.push('n'));saveDB();renderEditGrid();toast('Colonne ajoutée ✓');
+}
+function salle_remCol(){
+  const sl=salle(editSalleId);
+  if(sl.seats[0]?.length<=1){toast('Minimum 1 colonne','err');return;}
+  sl.seats.forEach(r=>r.pop());saveDB();renderEditGrid();toast('Colonne retirée');
+}
+
+/* ═══════════════ SEAT MAP ═══════════════ */
+function buildMap(sl, seanceId, preSel=[], interactive=false, key=''){
+  const taken = seanceId ? takenSeats(seanceId) : [];
+  let html=`<div class="seat-wrap"><div class="screen">🎬 ÉCRAN</div>`;
+  sl.seats.forEach((row,ri)=>{
+    html+=`<div class="srow"><div class="rlbl">${ABC[ri]}</div>`;
+    row.forEach((type,ci)=>{
+      if(type==='d'){html+=`<div class="s off"></div>`;return;}
+      const sid=sidKey(ri,ci);
+      const isVip=type==='v', isTaken=taken.includes(sid), isSel=preSel.includes(sid);
+      let cls='s '+(isVip?'vip ':'');
+      if(isTaken)cls+='pris';
+      else if(isSel)cls+='sel';
+      else cls+='libre';
+      const click=interactive&&!isTaken?`onclick="toggleSeat('${sid}','${key}')"` :'';
+      html+=`<button class="${cls}" ${click} id="seat-${key}-${sid}" title="${sid}${isVip?' ⭐':''}${isTaken?' [Réservé]':''}"></button>`;
+    });
+    html+=`</div>`;
+  });
+  html+=`</div><div class="leg">
+    <div class="leg-i"><div class="leg-d" style="background:var(--bg4);border:1px solid var(--border2)"></div>Libre</div>
+    <div class="leg-i"><div class="leg-d" style="background:rgba(240,192,64,.14);border:1px solid rgba(240,192,64,.3)"></div>VIP ⭐</div>
+    <div class="leg-i"><div class="leg-d" style="background:rgba(232,25,44,.25);border:1px solid rgba(232,25,44,.4)"></div>Réservé</div>
+    <div class="leg-i"><div class="leg-d" style="background:var(--green)"></div>Sélectionné</div>
+  </div>`;
+  return html;
+}
+
+function showPlan(seanceId){
+  const s=seance(seanceId), f=film(s.filmId), sl=salle(s.salleId);
+  $('mpl-title').textContent=`${f.emoji} ${f.titre} — ${s.heure} (${s.langue})`;
+  $('mpl-content').innerHTML=buildMap(sl,seanceId,[],false,'plan');
+  openModal('m-plan');
+}
+
+function toggleSeat(sid, key){
+  const idx=selSeats.indexOf(sid);
+  const btn=$(`seat-${key}-${sid}`);
+  const sl=salle(pickerSalleId);
+  const r=ABC.indexOf(sid[0]), c=parseInt(sid.slice(1))-1;
+  const isVip=sl&&sl.seats[r]&&sl.seats[r][c]==='v';
+  if(idx>=0){
+    selSeats.splice(idx,1);
+    if(btn){btn.classList.remove('sel');btn.classList.add('libre');}
+  } else {
+    selSeats.push(sid);
+    if(btn){btn.classList.remove('libre');btn.classList.add('sel');if(isVip)btn.classList.add('vip');}
+  }
+  const cnt=$(key==='mra'?'mra-cnt':'mrc-cnt');
+  if(cnt)cnt.textContent=selSeats.length?`(${selSeats.length} sélectionnée${selSeats.length>1?'s':''})`:' ';
+  if(key==='mrc')updateConfBox();
+}
+
+function buildPicker(key){
+  selSeats=[];
+  const sid=parseInt($(key==='mra'?'mra-seance':'mrc-sid').value);
+  if(!sid)return;
+  const s=seance(sid), sl=salle(s.salleId);
+  pickerSalleId=sl.id; pickerSeanceId=sid;
+  $(`${key}-picker`).innerHTML=buildMap(sl,sid,[],true,key);
+  const cnt=$(key==='mra'?'mra-cnt':'mrc-cnt');
+  if(cnt)cnt.textContent='';
+  if(key==='mrc'){$('mrc-conf').innerHTML='';updateConfBox();}
+}
+
+function updateConfBox(){
+  if(!selSeats.length){$('mrc-conf').innerHTML='';return;}
+  const tarif=$('mrc-tarif').value;
+  const p=price(tarif), total=(p*selSeats.length).toFixed(2);
+  $('mrc-conf').innerHTML=`
+    <div class="conf-box">
+      <div class="conf-row"><span>Places</span><span>${selSeats.join(', ')}</span></div>
+      <div class="conf-row"><span>Tarif</span><span>${tarif} — ${p}€/place</span></div>
+      <div class="conf-row"><span>Total</span><span>${total}€</span></div>
+    </div>`;
+}
+
+/* ═══════════════ RÉSERVATIONS ═══════════════ */
+function renderResas(){
+  if(!db.resas.length){$('resas-tbody').innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--gray);padding:40px">Aucune réservation</td></tr>';return;}
+  $('resas-tbody').innerHTML=db.resas.map(r=>{
+    const s=seance(r.seanceId),f=s?film(s.filmId):null,sl=s?salle(s.salleId):null;
+    const tot=(price(r.tarif)*r.seats.length).toFixed(2);
+    const sc=r.statut==='confirmé'?'tg':'to';
+    return `<tr>
+      <td><div class="bold">${r.client}</div></td>
+      <td>${f?f.emoji+' '+f.titre:'—'}</td>
+      <td>${s?fmtDate(s.date)+' '+s.heure:'—'}</td>
+      <td>${sl?sl.nom:'—'}</td>
+      <td>${r.seats.map(s=>`<span class="tag tb" style="margin:1px">${s}</span>`).join('')}</td>
+      <td>${r.tarif}</td>
+      <td class="c-gold bold">${tot}€</td>
+      <td><span class="tag ${sc}">${r.statut}</span></td>
+      <td><div class="fl g8">
+        <button class="btn btn-green btn-xs" onclick="confirmResa(${r.id})" ${r.statut==='confirmé'?'disabled':''}>✓</button>
+        <button class="btn btn-danger btn-xs" onclick="delResa(${r.id})">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function openResaAdmin(){
+  $('mra-id').value=''; $('mra-client').value='';
+  $('mra-seance').innerHTML=db.seances.map(s=>{
+    const f=film(s.filmId),sl=salle(s.salleId);
+    return `<option value="${s.id}">${f?f.emoji+' '+f.titre:'?'} — ${fmtDate(s.date)} ${s.heure} · ${sl?sl.nom:''}</option>`;
+  }).join('');
+  selSeats=[]; $('mra-cnt').textContent='';
+  buildPicker('mra');
+  openModal('m-resa-admin');
+}
+
+function saveResa(mode){
+  let client, sid, tarif;
+  if(mode==='admin'){
+    client=$('mra-client').value.trim();
+    sid=parseInt($('mra-seance').value);
+    tarif=$('mra-tarif').value;
+    if(!client){toast('Entrez le nom du client','err');return;}
+  } else {
+    client=session.name;
+    sid=pickerSeanceId;
+    tarif=$('mrc-tarif').value;
+  }
+  if(!selSeats.length){toast('Sélectionnez au moins une place','err');return;}
+  const conflict=selSeats.filter(s=>takenSeats(sid).includes(s));
+  if(conflict.length){toast(`Places déjà prises : ${conflict.join(', ')}`,'err');return;}
+  db.resas.push({id:db.nid.resa++,client,seanceId:sid,seats:[...selSeats],tarif,statut:'confirmé'});
+  selSeats=[];
+  closeModal(mode==='admin'?'m-resa-admin':'m-resa-client');
+  if(mode==='admin')renderResas(); else renderMesResas();
+  saveDB();toast('Réservation confirmée ✓');
+}
+
+function confirmResa(id){
+  const r=db.resas.find(r=>r.id===id);if(r){r.statut='confirmé';renderResas();toast('Confirmé ✓');}
+}
+function delResa(id){
+  db.resas=db.resas.filter(r=>r.id!==id);saveDB();renderResas();toast('Réservation supprimée','err');
+}
+
+/* ═══════════════ ADMINS ═══════════════ */
+function renderAdmins(){
+  $('admins-list').innerHTML = db.admins.map(a=>`
+    <div class="fl flb flc flw g12" style="padding:14px 0;border-bottom:1px solid var(--border);">
+      <div class="fl g12 flc">
+        <div class="user-ava">🔐</div>
+        <div>
+          <div class="bold" style="font-size:.9rem">${a.name}</div>
+          <div class="c-gray" style="font-size:.73rem">@${a.user} · <span class="tag ${a.role==='superadmin'?'tr':a.role==='admin'?'tb':'ty'}">${a.role}</span></div>
+        </div>
+      </div>
+      <div class="fl g8">
+        <button class="btn btn-gold btn-sm" onclick="openAdminModal(${a.id})">✏️ Modifier</button>
+        <button class="btn btn-danger btn-sm" onclick="delAdmin(${a.id})" ${a.id===1?'disabled':''}>🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openAdminModal(id){
+  $('ma-id').value=id||'';
+  if(id){
+    const a=db.admins.find(a=>a.id===id);
+    $('ma-title').textContent='Modifier le compte';
+    $('ma-name').value=a.name; $('ma-user').value=a.user;
+    $('ma-pass').value=a.pass; $('ma-role').value=a.role;
+  } else {
+    $('ma-title').textContent='Nouveau compte admin';
+    $('ma-name').value=''; $('ma-user').value=''; $('ma-pass').value='';
+  }
+  openModal('m-admin');
+}
+
+function saveAdmin(){
+  const name=$('ma-name').value.trim(), user=$('ma-user').value.trim(), pass=$('ma-pass').value;
+  if(!name||!user||!pass){toast('Tous les champs sont requis','err');return;}
+  const id=parseInt($('ma-id').value)||0;
+  if(db.admins.find(a=>a.user===user&&a.id!==id)){toast('Identifiant déjà utilisé','err');return;}
+  const obj={name,user,pass,role:$('ma-role').value};
+  if(id){Object.assign(db.admins.find(a=>a.id===id),obj);}
+  else{db.admins.push({id:db.nid.admin++,...obj});}
+  closeModal('m-admin');saveDB();renderAdmins();toast('Compte enregistré ✓');
+}
+
+function delAdmin(id){
+  if(id===1){toast('Impossible de supprimer le super admin','err');return;}
+  db.admins=db.admins.filter(a=>a.id!==id);saveDB();renderAdmins();toast('Compte supprimé','err');
+}
+
+/* ═══════════════ SETTINGS ═══════════════ */
+function saveSettings(){
+  db.settings={
+    name:$('cfg-name').value,addr:$('cfg-addr').value,
+    tn:parseFloat($('cfg-tn').value)||10.5,
+    tv:parseFloat($('cfg-tv').value)||15,
+    tr:parseFloat($('cfg-tr').value)||7.5,
+    te:parseFloat($('cfg-te').value)||5.5,
+  };
+  saveDB();toast('Paramètres sauvegardés ✓');
+}
+
+/* ═══════════════ CLIENT ═══════════════ */
+function renderCinema(){
+  $('c-welcome').textContent=`Bienvenue, ${session.name} !`;
+  const q=($('c-search')||{value:''}).value.toLowerCase();
+  const films=db.films.filter(f=>f.titre.toLowerCase().includes(q)||f.genre.toLowerCase().includes(q));
+  if(!films.length){$('client-films-grid').innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-ico">🎞</div>Aucun film trouvé</div>';return;}
+  $('client-films-grid').innerHTML=films.map((f,i)=>{
+    const fseances=db.seances.filter(s=>s.filmId===f.id&&s.date>=g()).sort((a,b)=>a.date.localeCompare(b.date)||a.heure.localeCompare(b.heure));
+    const btnHtml=fseances.length
+      ? fseances.slice(0,4).map(s=>`<button class="stime-btn" onclick="clientReserve(${s.id})">${fmtDate(s.date)} ${s.heure} ${s.langue}</button>`).join('')
+      : '<span class="c-gray" style="font-size:.75rem">Aucune séance prochaine</span>';
+    return `
+      <div class="film-card">
+        <div class="film-poster" style="background:${POSTERS[i%POSTERS.length]}">
+          ${f.emoji||GENRE_EMO[f.genre]||'🎬'}
+          <div class="film-badge">${f.genre}</div>
+        </div>
+        <div class="film-body">
+          <div class="film-name">${f.titre}</div>
+          <div class="film-meta mb10">${f.duree} min · ${f.real} · <span class="tag tb">${f.classif}</span></div>
+          <div class="film-seances">${btnHtml}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function clientReserve(seanceId){
+  const s=seance(seanceId), f=film(s.filmId), sl=salle(s.salleId);
+  selSeats=[];
+  pickerSalleId=sl.id; pickerSeanceId=seanceId;
+  $('mrc-sid').value=seanceId;
+  $('mrc-title').textContent=`${f.emoji} ${f.titre}`;
+  $('mrc-sub').textContent=`${fmtDate(s.date)} à ${s.heure} · ${sl.nom} · ${s.langue}`;
+  $('mrc-picker').innerHTML=buildMap(sl,seanceId,[],true,'mrc');
+  $('mrc-cnt').textContent=''; $('mrc-conf').innerHTML='';
+  openModal('m-resa-client');
+}
+
+function renderMesResas(){
+  $('mes-sub').textContent=`Connecté en tant que ${session.name}`;
+  const myR=db.resas.filter(r=>r.client.toLowerCase()===session.name.toLowerCase());
+  if(!myR.length){
+    $('mes-resas-list').innerHTML='<div class="empty"><div class="empty-ico">🎟</div>Aucune réservation à votre nom.<br>Réservez depuis la programmation !</div>';
+    return;
+  }
+  $('mes-resas-list').innerHTML=myR.map(r=>{
+    const s=seance(r.seanceId),f=s?film(s.filmId):null,sl=s?salle(s.salleId):null;
+    const tot=(price(r.tarif)*r.seats.length).toFixed(2);
+    return `
+      <div class="my-resa-card">
+        <div style="font-size:2rem">${f?f.emoji:'🎬'}</div>
+        <div style="flex:1;min-width:160px">
+          <div class="bold" style="font-size:.95rem">${f?f.titre:'?'}</div>
+          <div class="c-gray" style="font-size:.75rem;margin-top:3px">
+            📅 ${s?fmtDate(s.date)+' à '+s.heure:'—'} · ${sl?sl.nom:'—'} · ${s?s.langue:''}
+          </div>
+          <div style="margin-top:8px">${r.seats.map(s=>`<span class="tag tb" style="margin:1px">${s}</span>`).join('')}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="c-gold bold" style="font-size:1.2rem">${tot}€</div>
+          <div style="margin-top:4px"><span class="tag ${r.statut==='confirmé'?'tg':'to'}">${r.statut}</span></div>
+          <button class="btn btn-danger btn-sm mt10" onclick="cancelMyResa(${r.id})">Annuler</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function cancelMyResa(id){
+  db.resas=db.resas.filter(r=>r.id!==id);
+  saveDB();renderMesResas();toast('Réservation annulée','err');
+}
+
+
+/* ═══════════════ EN COURS ═══════════════ */
+function renderEnCours(){
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+  const currentHour = now.getHours()*60 + now.getMinutes();
+
+  // Get all seances today
+  const todaySeances = db.seances.filter(s => s.date === todayStr);
+
+  if(!todaySeances.length){
+    $('encours-content').innerHTML = `
+      <div class="empty"><div class="empty-ico">🎬</div>Aucune séance aujourd'hui</div>`;
+    return;
+  }
+
+  let html = '';
+
+  // Categorize seances
+  const encours = [], imminent = [], termine = [], avenir = [];
+
+  todaySeances.forEach(s => {
+    const [h,m] = s.heure.split(':').map(Number);
+    const startMin = h*60+m;
+    const f = film(s.filmId);
+    const duree = f ? f.duree : 90;
+    const endMin = startMin + duree;
+    const diff = startMin - currentHour;
+
+    if(currentHour >= startMin && currentHour < endMin) encours.push({s, startMin, endMin, diff});
+    else if(diff > 0 && diff <= 45) imminent.push({s, startMin, endMin, diff});
+    else if(currentHour >= endMin) termine.push({s, startMin, endMin, diff});
+    else avenir.push({s, startMin, endMin, diff});
+  });
+
+  function seanceBlock(item, status){
+    const {s, startMin, endMin} = item;
+    const f = film(s.filmId), sl = salle(s.salleId);
+    if(!f||!sl) return '';
+    const taken = takenSeats(s.id).length, tot = totalActive(sl);
+    const pct = Math.min(100, Math.round(taken/tot*100));
+    const pc = pct>=100?'p-r':pct>=70?'p-o':'p-g';
+    const elapsed = currentHour - startMin;
+    const remaining = endMin - currentHour;
+    const progress = Math.min(100, Math.max(0, Math.round(elapsed / (endMin-startMin) * 100)));
+
+    let statusBadge = '', extraInfo = '';
+    if(status==='encours'){
+      statusBadge = `<span class="tag" style="background:rgba(232,25,44,.2);color:#ff4d5e;animation:blink 1.2s infinite">🔴 EN COURS</span>`;
+      extraInfo = `
+        <div style="margin-top:12px">
+          <div class="fl flb" style="font-size:.72rem;color:var(--gray);margin-bottom:5px">
+            <span>Progression</span><span>${remaining} min restantes</span>
+          </div>
+          <div class="pbar"><div class="pfill p-r" style="width:${progress}%"></div></div>
+        </div>`;
+    } else if(status==='imminent'){
+      statusBadge = `<span class="tag ty">⏳ Dans ${item.diff} min</span>`;
+    } else if(status==='termine'){
+      statusBadge = `<span class="tag" style="background:rgba(255,255,255,.06);color:var(--gray)">✓ Terminée</span>`;
+    } else {
+      statusBadge = `<span class="tag tb">🕐 ${s.heure}</span>`;
+    }
+
+    return `
+      <div class="seance-row" style="${status==='encours'?'border-color:rgba(232,25,44,.4);background:rgba(232,25,44,.04);':''}${status==='termine'?'opacity:.5;':''}">
+        <div class="sr-time" style="${status==='termine'?'color:var(--gray)':''}">${s.heure}</div>
+        <div style="font-size:1.5rem">${f.emoji||'🎬'}</div>
+        <div class="sr-info" style="flex:1">
+          <div class="sr-title">${f.titre}</div>
+          <div class="sr-sub">${sl.nom} · ${s.langue} · ${f.duree} min</div>
+          <div style="margin-top:6px">${statusBadge}</div>
+          ${extraInfo}
+        </div>
+        <div class="sr-dispo" style="text-align:right">
+          <div style="font-size:.75rem;color:var(--gray);margin-bottom:4px">${taken}/${tot} places</div>
+          <div class="pbar" style="width:70px;margin:0 0 3px auto"><div class="pfill ${pc}" style="width:${pct}%"></div></div>
+          <div style="font-size:.68rem;color:var(--gray)">${pct}% remplie</div>
+        </div>
+      </div>`;
+  }
+
+  if(encours.length){
+    html += `<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--red);margin-bottom:10px">🔴 En ce moment</div>`;
+    html += encours.map(i=>seanceBlock(i,'encours')).join('');
+    html += '<hr>';
+  }
+  if(imminent.length){
+    html += `<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--gold);margin:14px 0 10px">⏳ Imminentes (moins de 45 min)</div>`;
+    html += imminent.map(i=>seanceBlock(i,'imminent')).join('');
+    html += '<hr>';
+  }
+  if(avenir.length){
+    html += `<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--gray);margin:14px 0 10px">🕐 Plus tard aujourd'hui</div>`;
+    html += avenir.map(i=>seanceBlock(i,'avenir')).join('');
+    html += '<hr>';
+  }
+  if(termine.length){
+    html += `<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--gray2);margin:14px 0 10px">✓ Terminées</div>`;
+    html += termine.map(i=>seanceBlock(i,'termine')).join('');
+  }
+
+  if(!html) html = `<div class="empty"><div class="empty-ico">🎬</div>Aucune séance aujourd'hui</div>`;
+  $('encours-content').innerHTML = html;
+
+  // Auto-refresh every 60 seconds
+  clearTimeout(window._enCoursTimer);
+  window._enCoursTimer = setTimeout(()=>{
+    if($('p-en-cours').classList.contains('on')) renderEnCours();
+  }, 60000);
+}
+
+/* ═══════════════ EXPORT ═══════════════ */
+function exportCSV(){
+  const rows=[['Client','Film','Date','Heure','Salle','Places','Tarif','Total €','Statut']];
+  db.resas.forEach(r=>{
+    const s=seance(r.seanceId),f=s?film(s.filmId):null,sl=s?salle(s.salleId):null;
+    rows.push([r.client,f?f.titre:'?',s?s.date:'?',s?s.heure:'?',sl?sl.nom:'?',r.seats.join(';'),r.tarif,(price(r.tarif)*r.seats.length).toFixed(2),r.statut]);
+  });
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='reservations_cinelux.csv';a.click();
+  toast('Export CSV téléchargé ✓');
+}
+
+/* ═══════════════ MODALS ═══════════════ */
+function openModal(id){$(id).classList.add('on');}
+function closeModal(id){$(id).classList.remove('on');}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on');}));
+</script>
+</body>
+</html>
